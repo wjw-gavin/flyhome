@@ -5,6 +5,14 @@
   --ui-radius: 0.75rem;
 }
 
+/* Tailwind 4 preflight dropped cursor: pointer on buttons; restore it site-wide. */
+@layer base {
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+}
+
 body {
   background:
     radial-gradient(1200px 500px at 10% -10%, color-mix(in oklab, var(--ui-primary) 14%, transparent), transparent 60%),
