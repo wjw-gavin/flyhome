@@ -1,7 +1,7 @@
 # FlyHome · 回家机票比价
 
 阿联酋（迪拜 / 阿布扎比）往返国内 15 个主要城市的机票监控看板，最终目的地周口，人民币报价。
-需要时在页面上点一下「抓取最新价格」，从 Google Flights 抓一轮往返价，按「票价 + 时间成本 + 中转扣分 + 高铁回家」算综合成本排序，静态页面部署在 GitHub Pages。
+每周一自动从 Google Flights 抓一轮往返价（也可在页面上点「抓取最新价格」随时抓），按「票价 + 时间成本 + 中转扣分 + 高铁回家」算综合成本排序，静态页面部署在 GitHub Pages。
 
 ## 怎么跑
 
@@ -18,7 +18,7 @@ pnpm generate    # 产出 .output/public
 ## 数据来源与额度
 
 - Google Flights 没有官方 API，通过 [SerpApi](https://serpapi.com/google-flights-api) 查询。免费档每月 250 次搜索。
-- 一次抓取 = `arrivalGroups` 数量 × 日期对数量。默认 2 组 × 12 个出发日 = 24 次，免费额度够手动点 10 次/月。没有定时任务；想要趋势图有意义可以在 `fetch.yml` 里加回 `schedule`（每周一次 ≈ 100 次/月）。
+- 一次抓取 = `arrivalGroups` 数量 × 日期对数量。默认 2 组 × 12 个出发日 = 24 次；每周一自动一轮 ≈ 100~120 次/月，剩下的留给手动点。额度不累积，月底清零。
 - 抓取前会先查账户余额，不够一整轮就直接跳过，避免半截数据覆盖 `latest.json`。
 - 一个查询最多能带 9 个机场（实测），所以分两组：A 组离周口近（北京/上海/南京/郑州/合肥/武汉/西安），B 组其他枢纽（广州/深圳/杭州/成都/重庆/昆明/天津/长沙）。
 - 用国家 kgmid（`/m/0d05w3` 中国）当目的地也能查，但 Google 只给它挑的"热门"结果，南京、郑州这类根本不出现，所以没采用。
@@ -49,7 +49,7 @@ pnpm generate    # 产出 .output/public
 
 ## 部署
 
-- `fetch.yml`：只能手动触发（页面按钮或 Actions 页 Run workflow），抓取后提交 `data/`，然后调用部署。
+- `fetch.yml`：每周一 07:00（迪拜时间）自动抓取，也可手动触发（页面按钮或 Actions 页 Run workflow），抓取后提交 `data/`，然后调用部署。公开仓库 60 天没人提交时 GitHub 会自动停掉定时任务，Actions 页会提示，点一下 Enable 即可。
 - `deploy.yml`：`nuxt generate` → GitHub Pages。
 - 需要在仓库 Settings → Secrets 里配置 `SERPAPI_KEY`，Settings → Pages 的 Source 选 GitHub Actions。
 
