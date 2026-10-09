@@ -7,6 +7,8 @@
     "郑州": ["CGO"]
   },
   "arrivalGroups": [["PEK", "PKX", "PVG", "SHA", "NKG", "CGO"]],
+  "keepPerQuery": 60,
+  "keepRunDays": 90,
   "search": {
     "currency": "AED",
     "hl": "zh-CN",

@@ -9,7 +9,7 @@
     "generate": "nuxt generate",
     "preview": "nuxt preview",
     "typecheck": "nuxt typecheck",
-    "fetch": "node --env-file-if-exists=.env scripts/fetch.mjs",
+    "fetch-prices": "node --env-file-if-exists=.env scripts/fetch.mjs",
     "sample": "node scripts/sample.mjs",
     "postinstall": "nuxt prepare"
   },

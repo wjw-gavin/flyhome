@@ -11,7 +11,7 @@ pnpm sample      # 生成示例数据（不花额度），用来调界面
 pnpm dev         # http://localhost:3000
 
 cp .env.example .env   # 填 SERPAPI_KEY
-pnpm fetch       # 真实抓一次，写入 data/
+pnpm fetch-prices   # 真实抓一次，写入 data/（不能叫 pnpm fetch，那是 pnpm 的内置命令）
 pnpm generate    # 产出 .output/public
 ```
 
@@ -32,6 +32,8 @@ pnpm generate    # 产出 .output/public
 | `trip.days` | 往返间隔（默认 28 天） |
 | `trip.fromDays / toDays / stepDays` | 扫描的出发日：今天起 +14 天到 +112 天，每 7 天一个 |
 | `search.bags` | 随身行李件数（影响低成本航司报价） |
+| `keepPerQuery` | 每个日期对保留的方案数（取最便宜的 N 条 + 默认权重下性价比最高的 N/2 条 + Google 推荐），原始返回约 300 条/查询，不裁剪一次抓取 6.7 MB |
+| `keepRunDays` | `data/runs/` 保留天数；`history.json` 是累积的，不受影响 |
 | `home.onward` | 各机场 → 高铁站 → 周口的换乘时间、车程、票价（估算，自己改） |
 
 打分参数（每小时时间价值、中转扣分、是否算高铁）在页面上实时调，存在浏览器本地。

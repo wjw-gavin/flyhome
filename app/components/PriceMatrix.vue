@@ -15,7 +15,7 @@
         <thead>
           <tr class="border-b border-default text-xs text-muted">
             <th class="px-4 py-2 text-left font-medium">出发 → 返回</th>
-            <th class="px-2 py-2 text-left font-medium">Google 价格水平</th>
+            <th v-if="hasInsights" class="px-2 py-2 text-left font-medium">Google 价格水平</th>
             <th v-for="c in cities" :key="c" class="px-3 py-2 text-right font-medium">{{ c }}</th>
           </tr>
         </thead>
@@ -33,7 +33,7 @@
                 <span class="text-dimmed">→ {{ fmtDate(row.ret, false) }}</span>
               </button>
             </td>
-            <td class="px-2 py-2">
+            <td v-if="hasInsights" class="px-2 py-2">
               <UBadge v-if="row.level" :color="LEVEL[row.level]?.color ?? 'neutral'" variant="subtle" size="sm">
                 {{ LEVEL[row.level]?.label ?? row.level }}
               </UBadge>
@@ -73,6 +73,9 @@ const LEVEL: Record<string, { label: string, color: 'success' | 'neutral' | 'err
   typical: { label: '正常', color: 'neutral' },
   high: { label: '偏高', color: 'error' },
 }
+
+// Google only returns price_insights for single-airport searches; multi-airport runs have none.
+const hasInsights = latest.queries.some(q => q.priceInsights)
 
 const rows = computed(() => {
   const byOut = new Map<string, { out: string, ret: string, level?: string, cells: Record<string, number> }>()

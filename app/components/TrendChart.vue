@@ -6,7 +6,7 @@
           <UIcon name="i-lucide-trending-down" class="size-4 text-primary" />
           价格走势
         </div>
-        <UTabs v-model="tab" :items="tabs" :content="false" size="xs" color="neutral" />
+        <UTabs v-if="hasInsights" v-model="tab" :items="tabs" :content="false" size="xs" color="neutral" />
       </div>
     </template>
 
@@ -38,6 +38,7 @@ const props = defineProps<{ selectedOut: string | null, cities: string[], curren
 
 const colorMode = useColorMode()
 const theme = computed(() => (colorMode.value === 'dark' ? 'dark' : undefined))
+const hasInsights = latest.queries.some(q => q.priceInsights)
 const tab = ref<'ours' | 'google'>('ours')
 const tabs = [
   { label: '我的抓取记录', value: 'ours' },
