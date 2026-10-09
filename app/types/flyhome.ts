@@ -1,0 +1,112 @@
+export interface Segment {
+  from: string
+  fromName: string
+  to: string
+  toName: string
+  dep: string
+  arr: string
+  airline: string
+  airlineLogo?: string
+  flightNumber: string
+  airplane?: string
+  duration: number
+  legroom?: string
+  overnight?: boolean
+  extensions?: string[]
+}
+
+export interface Layover {
+  id: string
+  name: string
+  duration: number
+  overnight?: boolean
+}
+
+export interface Itinerary {
+  id: string
+  origin: string
+  originName: string
+  dest: string
+  destName: string
+  price: number
+  totalDuration: number
+  stops: number
+  layovers: Layover[]
+  segments: Segment[]
+  airlines: string[]
+  airlineLogo?: string
+  extensions: string[]
+  carbon?: number
+  best: boolean
+}
+
+export interface PriceInsights {
+  lowest: number
+  level: string
+  typicalRange: [number, number] | null
+  history: [number, number][]
+}
+
+export interface Query {
+  id: string
+  out: string
+  ret: string
+  group: string[]
+  googleUrl: string
+  priceInsights: PriceInsights | null
+  itineraries: Itinerary[]
+}
+
+export interface RunFile {
+  date: string
+  fetchedAt: string
+  sample?: boolean
+  currency: string
+  quota: { left: number, total: number | null } | null
+  queries: Query[]
+}
+
+export interface HistoryPoint {
+  run: string
+  out: string
+  ret: string
+  city: string
+  min: number
+}
+
+export interface Onward {
+  station: string
+  transferHours: number
+  trainHours: number
+  trainCny: number
+}
+
+export interface FlyhomeConfig {
+  origins: string[]
+  cities: Record<string, string[]>
+  arrivalGroups: string[][]
+  search: { currency: string, hl: string, gl: string, bags: number, showHidden: boolean }
+  trip: { days: number, fromDays: number, toDays: number, stepDays: number }
+  home: { name: string, cnyPerAed: number, onward: Record<string, Onward> }
+}
+
+export interface Settings {
+  hourValue: number
+  stopPenalty: number
+  overnightPenalty: number
+  includeOnward: boolean
+  maxStops: number
+  origins: string[]
+  cities: string[]
+  sort: 'score' | 'price' | 'duration'
+}
+
+/** An itinerary annotated with the run-time score and its date pair. */
+export interface Scored extends Itinerary {
+  query: Query
+  city: string
+  score: number
+  onwardCost: number
+  onwardHours: number
+  flightCost: number
+}

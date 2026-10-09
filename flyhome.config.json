@@ -1,0 +1,35 @@
+{
+  "origins": ["DXB", "AUH"],
+  "cities": {
+    "北京": ["PEK", "PKX"],
+    "上海": ["PVG", "SHA"],
+    "南京": ["NKG"],
+    "郑州": ["CGO"]
+  },
+  "arrivalGroups": [["PEK", "PKX", "PVG", "SHA", "NKG", "CGO"]],
+  "search": {
+    "currency": "AED",
+    "hl": "zh-CN",
+    "gl": "ae",
+    "bags": 1,
+    "showHidden": true
+  },
+  "trip": {
+    "days": 28,
+    "fromDays": 14,
+    "toDays": 112,
+    "stepDays": 7
+  },
+  "home": {
+    "name": "周口",
+    "cnyPerAed": 1.98,
+    "onward": {
+      "PEK": { "station": "北京西", "transferHours": 1.2, "trainHours": 4.4, "trainCny": 400 },
+      "PKX": { "station": "北京西", "transferHours": 0.9, "trainHours": 4.4, "trainCny": 400 },
+      "PVG": { "station": "上海虹桥", "transferHours": 1.2, "trainHours": 4.7, "trainCny": 370 },
+      "SHA": { "station": "上海虹桥", "transferHours": 0.2, "trainHours": 4.7, "trainCny": 370 },
+      "NKG": { "station": "南京南", "transferHours": 0.6, "trainHours": 3.0, "trainCny": 240 },
+      "CGO": { "station": "郑州东", "transferHours": 0.5, "trainHours": 1.0, "trainCny": 65 }
+    }
+  }
+}
