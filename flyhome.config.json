@@ -7,14 +7,13 @@
     "南京": ["NKG"],
     "武汉": ["WUH"],
     "西安": ["XIY"],
-    "杭州": ["HGH"],
     "长沙": ["CSX"],
     "广州": ["CAN"],
     "成都": ["TFU", "CTU"]
   },
   "arrivalGroups": [
     ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "WUH", "XIY"],
-    ["CAN", "HGH", "TFU", "CTU", "CSX"]
+    ["CAN", "TFU", "CTU", "CSX"]
   ],
   "keepPerQuery": 60,
   "keepRunDays": 90,
