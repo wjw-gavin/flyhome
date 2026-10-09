@@ -35,6 +35,7 @@ pnpm generate    # 产出 .output/public
 | `trip.fromDays / toDays / weekdays` | 扫描的出发日：今天起 +30 天到 +75 天里的每个周四/五/六（`weekdays` 用 JS 约定，0 = 周日）；去掉 `weekdays` 则按 `stepDays` 等步长。页面会隐藏早于 fromDays 的旧扫描行 |
 | `custom.keep` | 「查指定日期」最多保留几组 |
 | `search.bags` | 随身行李件数（影响低成本航司报价） |
+| `search.maxStops` | 抓取时就只要最多这么多次中转（默认 1，传给 Google 的 stops 过滤），页面筛选的默认值也跟它走 |
 | `keepPerQuery` | 每个日期对保留的方案数（取最便宜的 N 条 + 默认权重下性价比最高的 N/2 条 + Google 推荐），原始返回约 300 条/查询，不裁剪一次抓取 6.7 MB |
 | `keepRunDays` | `data/runs/` 保留天数；`history.json` 是累积的，不受影响 |
 | `scoring` | 打分默认值（每小时价值、每次中转、隔夜中转），单位人民币；页面滑块可临时覆盖 |

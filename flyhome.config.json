@@ -21,6 +21,7 @@
     "hl": "zh-CN",
     "gl": "ae",
     "bags": 1,
+    "maxStops": 1,
     "showHidden": true
   },
   "trip": {

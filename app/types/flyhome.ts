@@ -90,7 +90,7 @@ export interface FlyhomeConfig {
   arrivalGroups: string[][]
   custom: { keep: number }
   github: { repo: string, workflow: string, branch: string }
-  search: { currency: string, hl: string, gl: string, bags: number, showHidden: boolean }
+  search: { currency: string, hl: string, gl: string, bags: number, maxStops?: number, showHidden: boolean }
   /** weekdays use JS convention (0 = Sunday); when absent the scan steps every stepDays. */
   trip: { days: number, fromDays: number, toDays: number, weekdays?: number[], stepDays?: number }
   scoring: { hourValue: number, stopPenalty: number, overnightPenalty: number }

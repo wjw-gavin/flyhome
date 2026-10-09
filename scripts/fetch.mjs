@@ -40,7 +40,9 @@ if (left < jobs.length) {
   process.exit(0)
 }
 
-const { currency, hl, gl, bags, showHidden } = config.search
+const { currency, hl, gl, bags, showHidden, maxStops } = config.search
+// SerpApi `stops`: 0 any, 1 nonstop, 2 one stop or fewer, 3 two stops or fewer.
+const stops = maxStops === undefined ? 0 : Math.min(maxStops + 1, 3)
 const queries = []
 for (const job of jobs) {
   const params = new URLSearchParams({
@@ -53,6 +55,7 @@ for (const job of jobs) {
     type: '1',
     adults: '1',
     bags: String(bags),
+    stops: String(stops),
     show_hidden: String(showHidden),
     currency,
     hl,

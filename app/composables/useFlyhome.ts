@@ -4,7 +4,7 @@ import customJson from '~~/data/custom.json'
 import configJson from '~~/flyhome.config.json'
 import type { FlyhomeConfig, HistoryPoint, Itinerary, Query, RunFile, Scored, Settings } from '~/types/flyhome'
 
-const STORAGE_KEY = 'flyhome.settings.v3'
+const STORAGE_KEY = 'flyhome.settings.v4'
 
 export const config = configJson as FlyhomeConfig
 export const latest = latestJson as unknown as RunFile
@@ -30,7 +30,7 @@ function defaultSettings(): Settings {
   return {
     ...config.scoring,
     includeOnward: true,
-    maxStops: 2,
+    maxStops: config.search.maxStops ?? 2,
     origins: [...config.origins],
     cities: [...cityNames],
     weekdays: [0, 1, 2, 3, 4, 5, 6],
