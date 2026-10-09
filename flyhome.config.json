@@ -4,22 +4,17 @@
     "北京": ["PEK", "PKX"],
     "上海": ["PVG", "SHA"],
     "郑州": ["CGO"],
-    "合肥": ["HFE"],
     "南京": ["NKG"],
     "武汉": ["WUH"],
     "西安": ["XIY"],
     "杭州": ["HGH"],
-    "天津": ["TSN"],
     "长沙": ["CSX"],
     "广州": ["CAN"],
-    "深圳": ["SZX"],
-    "成都": ["TFU", "CTU"],
-    "重庆": ["CKG"],
-    "昆明": ["KMG"]
+    "成都": ["TFU", "CTU"]
   },
   "arrivalGroups": [
-    ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "HFE", "WUH", "XIY"],
-    ["CAN", "SZX", "HGH", "TFU", "CTU", "CKG", "KMG", "TSN", "CSX"]
+    ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "WUH", "XIY"],
+    ["CAN", "HGH", "TFU", "CTU", "CSX"]
   ],
   "keepPerQuery": 60,
   "keepRunDays": 90,
