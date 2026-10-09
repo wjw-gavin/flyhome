@@ -2,9 +2,18 @@ name: Fetch prices
 
 on:
   schedule:
-    # Mon 07:00 Dubai time; 2 groups × 12 date pairs = 24 searches per run ≈ 100–120/month (free tier 250, no rollover).
+    # Mon 07:00 Dubai time; Thu/Fri/Sat departures × 12 weeks × 1 group ≈ 36 searches/run (free tier 250/month).
     - cron: '0 3 * * 1'
   workflow_dispatch:
+    inputs:
+      out:
+        description: '自定义出发日期 YYYY-MM-DD（留空 = 全量扫描）'
+        required: false
+        type: string
+      ret:
+        description: '自定义返回日期 YYYY-MM-DD（留空 = 出发 + 28 天）'
+        required: false
+        type: string
 
 permissions:
   contents: write
@@ -27,7 +36,11 @@ jobs:
       - run: node scripts/fetch.mjs
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
+          CUSTOM_OUT: ${{ inputs.out }}
+          CUSTOM_RET: ${{ inputs.ret }}
       - id: commit
+        env:
+          CUSTOM_OUT: ${{ inputs.out }}
         run: |
           git config user.name "flyhome-bot"
           git config user.email "flyhome-bot@users.noreply.github.com"
@@ -35,7 +48,8 @@ jobs:
           if git diff --cached --quiet; then
             echo "changed=false" >> "$GITHUB_OUTPUT"
           else
-            git commit -m "data: $(TZ=Asia/Dubai date +%F)"
+            if [ -n "$CUSTOM_OUT" ]; then msg="custom: $CUSTOM_OUT"; else msg="data: $(TZ=Asia/Dubai date +%F)"; fi
+            git commit -m "$msg"
             git push
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi

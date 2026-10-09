@@ -1,6 +1,7 @@
-// Pull round-trip prices from Google Flights (via SerpApi) for every scheduled date pair
-// and store a normalized run under data/. One SerpApi search per (arrival group × date pair).
-import { buildDatePairs, loadConfig, saveRun, todayDubai } from './lib/common.mjs'
+// Pull round-trip prices from Google Flights (via SerpApi) and store a normalized run under data/.
+// Default: every scheduled date pair × arrival group → data/runs + latest.json.
+// With CUSTOM_OUT (and optional CUSTOM_RET) set: just that one date pair → data/custom.json.
+import { addDays, buildDatePairs, loadConfig, saveCustom, saveRun, todayDubai } from './lib/common.mjs'
 import { normalizeResponse } from './lib/normalize.mjs'
 
 const key = process.env.SERPAPI_KEY
@@ -11,7 +12,20 @@ if (!key) {
 
 const config = await loadConfig()
 const today = todayDubai()
-const pairs = buildDatePairs(config, today)
+
+const customOut = process.env.CUSTOM_OUT?.trim()
+let pairs
+if (customOut) {
+  const ret = process.env.CUSTOM_RET?.trim() || addDays(customOut, config.trip.days)
+  const iso = /^\d{4}-\d{2}-\d{2}$/
+  if (!iso.test(customOut) || !iso.test(ret) || ret <= customOut || customOut <= today) {
+    console.error(`Bad custom dates: out=${customOut} ret=${ret} (need YYYY-MM-DD, out after today, ret after out).`)
+    process.exit(1)
+  }
+  pairs = [{ out: customOut, ret }]
+} else {
+  pairs = buildDatePairs(config, today)
+}
 const jobs = config.arrivalGroups.flatMap(group => pairs.map(p => ({ group, ...p })))
 
 const account = await (await fetch(`https://serpapi.com/account.json?api_key=${key}`)).json()
@@ -53,7 +67,8 @@ for (const job of jobs) {
       continue
     }
     const q = normalizeResponse(json, job, config)
-    console.log(`[ok] ${label}: ${q.itineraries.length} itineraries, lowest ${q.priceInsights?.lowest ?? '-'} ${currency}`)
+    q.fetchedAt = new Date().toISOString()
+    console.log(`[ok] ${label}: ${q.itineraries.length} itineraries`)
     queries.push(q)
   } catch (err) {
     console.warn(`[fail] ${label}: ${err.message}`)
@@ -66,11 +81,11 @@ if (queries.length === 0) {
   process.exit(1)
 }
 
-await saveRun({
-  date: today,
-  fetchedAt: new Date().toISOString(),
-  currency,
-  quota: { left: left - queries.length, total: account.searches_per_month ?? null },
-  queries,
-})
-console.log(`Saved run ${today} with ${queries.length}/${jobs.length} queries.`)
+const quota = { left: left - queries.length, total: account.searches_per_month ?? null }
+if (customOut) {
+  await saveCustom(queries, quota)
+  console.log(`Saved custom query ${pairs[0].out}↔${pairs[0].ret} (${queries.length}/${jobs.length} groups).`)
+} else {
+  await saveRun({ date: today, fetchedAt: new Date().toISOString(), currency, quota, queries })
+  console.log(`Saved run ${today} with ${queries.length}/${jobs.length} queries.`)
+}

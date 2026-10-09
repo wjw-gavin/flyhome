@@ -6,17 +6,15 @@
     "郑州": ["CGO"],
     "南京": ["NKG"],
     "武汉": ["WUH"],
-    "西安": ["XIY"],
-    "长沙": ["CSX"],
     "广州": ["CAN"],
-    "成都": ["TFU", "CTU"]
+    "成都": ["TFU"]
   },
   "arrivalGroups": [
-    ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "WUH", "XIY"],
-    ["CAN", "TFU", "CTU", "CSX"]
+    ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "WUH", "CAN", "TFU"]
   ],
   "keepPerQuery": 60,
   "keepRunDays": 90,
+  "custom": { "keep": 30 },
   "github": { "repo": "wjw-gavin/flyhome", "workflow": "fetch.yml", "branch": "main" },
   "search": {
     "currency": "CNY",
@@ -29,7 +27,7 @@
     "days": 28,
     "fromDays": 14,
     "toDays": 91,
-    "stepDays": 7
+    "weekdays": [4, 5, 6]
   },
   "scoring": {
     "hourValue": 50,

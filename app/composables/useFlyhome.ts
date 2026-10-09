@@ -1,14 +1,19 @@
 import latestJson from '~~/data/latest.json'
 import historyJson from '~~/data/history.json'
+import customJson from '~~/data/custom.json'
 import configJson from '~~/flyhome.config.json'
 import type { FlyhomeConfig, HistoryPoint, Itinerary, Query, RunFile, Scored, Settings } from '~/types/flyhome'
 
-const STORAGE_KEY = 'flyhome.settings.v2'
+const STORAGE_KEY = 'flyhome.settings.v3'
 
 export const config = configJson as FlyhomeConfig
 export const latest = latestJson as unknown as RunFile
+export const customQueries = customJson as unknown as Query[]
 // Named to avoid shadowing window.history inside components.
 export const priceHistory = historyJson as HistoryPoint[]
+
+/** Scheduled scan plus one-off custom date pairs, in departure order. */
+export const allQueries: Query[] = [...latest.queries, ...customQueries].sort((a, b) => a.out.localeCompare(b.out))
 
 export const cityNames = Object.keys(config.cities)
 
@@ -23,6 +28,7 @@ function defaultSettings(): Settings {
     maxStops: 2,
     origins: [...config.origins],
     cities: [...cityNames],
+    weekdays: [0, 1, 2, 3, 4, 5, 6],
     sort: 'score',
   }
 }
@@ -71,9 +77,13 @@ function collapseVariants(list: Scored[]) {
   return [...groups.values()]
 }
 
+export function queryPassesFilters(q: Query, s: Settings) {
+  return s.weekdays.includes(weekdayOf(q.out))
+}
+
 export function useRanked(settings: Ref<Settings>, selectedOut: Ref<string | null>) {
   const all = computed<Scored[]>(() =>
-    latest.queries.flatMap(q => q.itineraries.map(it => scoreItinerary(it, q, settings.value))),
+    allQueries.flatMap(q => q.itineraries.map(it => scoreItinerary(it, q, settings.value))),
   )
 
   const filtered = computed(() => {
@@ -82,6 +92,7 @@ export function useRanked(settings: Ref<Settings>, selectedOut: Ref<string | nul
       s.origins.includes(it.origin)
       && s.cities.includes(it.city)
       && it.stops <= s.maxStops
+      && queryPassesFilters(it.query, s)
       && (!selectedOut.value || it.query.out === selectedOut.value),
     )
   })

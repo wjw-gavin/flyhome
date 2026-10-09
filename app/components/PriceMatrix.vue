@@ -22,7 +22,7 @@
         <tbody>
           <tr
             v-for="row in rows"
-            :key="row.out"
+            :key="row.id"
             class="border-b border-default/60 transition-colors last:border-0 hover:bg-elevated/60"
             :class="{ 'bg-primary/5': selected === row.out }"
           >
@@ -31,6 +31,9 @@
                 <UIcon :name="selected === row.out ? 'i-lucide-circle-check' : 'i-lucide-circle'" class="size-3.5" :class="selected === row.out ? 'text-primary' : 'text-dimmed'" />
                 <span class="font-medium text-highlighted">{{ fmtDate(row.out) }}</span>
                 <span class="text-dimmed">→ {{ fmtDate(row.ret, false) }}</span>
+                <UTooltip v-if="row.custom" :text="`自定义查询，抓取于 ${row.fetchedAt ? fmtDateTime(row.fetchedAt) : '?'}`">
+                  <UBadge color="info" variant="subtle" size="xs" icon="i-lucide-calendar-search">自定义</UBadge>
+                </UTooltip>
               </button>
             </td>
             <td v-if="hasInsights" class="px-2 py-2">
@@ -63,6 +66,7 @@ import type { Scored } from '~/types/flyhome'
 const props = defineProps<{
   items: Scored[]
   cities: string[]
+  weekdays: number[]
   currency: string
   selected: string | null
 }>()
@@ -75,19 +79,25 @@ const LEVEL: Record<string, { label: string, color: 'success' | 'neutral' | 'err
 }
 
 // Google only returns price_insights for single-airport searches; multi-airport runs have none.
-const hasInsights = latest.queries.some(q => q.priceInsights)
+const hasInsights = allQueries.some(q => q.priceInsights)
+
+interface Row { id: string, out: string, ret: string, custom?: boolean, fetchedAt?: string, level?: string, cells: Record<string, number> }
 
 const rows = computed(() => {
-  const byOut = new Map<string, { out: string, ret: string, level?: string, cells: Record<string, number> }>()
-  for (const q of latest.queries) {
-    byOut.set(q.out, { out: q.out, ret: q.ret, level: q.priceInsights?.level, cells: {} })
+  // One row per date pair: arrival groups of the same pair merge; a custom query gets its own row.
+  const rowKey = (q: { out: string, ret: string, custom?: boolean }) => `${q.out}_${q.ret}_${q.custom ? 'custom' : 'scan'}`
+  const byKey = new Map<string, Row>()
+  for (const q of allQueries) {
+    if (!props.weekdays.includes(weekdayOf(q.out))) continue
+    const key = rowKey(q)
+    if (!byKey.has(key)) byKey.set(key, { id: key, out: q.out, ret: q.ret, custom: q.custom, fetchedAt: q.fetchedAt, level: q.priceInsights?.level, cells: {} })
   }
   for (const it of props.items) {
-    const row = byOut.get(it.query.out)
+    const row = byKey.get(rowKey(it.query))
     if (!row) continue
     row.cells[it.city] = Math.min(row.cells[it.city] ?? Infinity, it.price)
   }
-  return [...byOut.values()].sort((a, b) => a.out.localeCompare(b.out))
+  return [...byKey.values()].sort((a, b) => a.out.localeCompare(b.out) || a.ret.localeCompare(b.ret))
 })
 
 // Only cities that actually have a price under the current filters, so the table stays narrow.

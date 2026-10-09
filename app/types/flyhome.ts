@@ -55,6 +55,9 @@ export interface Query {
   googleUrl: string
   priceInsights: PriceInsights | null
   itineraries: Itinerary[]
+  fetchedAt?: string
+  /** Requested from the page for a specific date pair rather than by the scheduled scan. */
+  custom?: boolean
 }
 
 export interface RunFile {
@@ -85,9 +88,11 @@ export interface FlyhomeConfig {
   origins: string[]
   cities: Record<string, string[]>
   arrivalGroups: string[][]
+  custom: { keep: number }
   github: { repo: string, workflow: string, branch: string }
   search: { currency: string, hl: string, gl: string, bags: number, showHidden: boolean }
-  trip: { days: number, fromDays: number, toDays: number, stepDays: number }
+  /** weekdays use JS convention (0 = Sunday); when absent the scan steps every stepDays. */
+  trip: { days: number, fromDays: number, toDays: number, weekdays?: number[], stepDays?: number }
   scoring: { hourValue: number, stopPenalty: number, overnightPenalty: number }
   home: { name: string, onwardFallback: Onward, onward: Record<string, Onward> }
 }
@@ -100,6 +105,7 @@ export interface Settings {
   maxStops: number
   origins: string[]
   cities: string[]
+  weekdays: number[]
   sort: 'score' | 'price' | 'duration'
 }
 

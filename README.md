@@ -18,9 +18,9 @@ pnpm generate    # 产出 .output/public
 ## 数据来源与额度
 
 - Google Flights 没有官方 API，通过 [SerpApi](https://serpapi.com/google-flights-api) 查询。免费档每月 250 次搜索。
-- 一次抓取 = `arrivalGroups` 数量 × 日期对数量。默认 2 组 × 12 个出发日 = 24 次；每周一自动一轮 ≈ 100~120 次/月，剩下的留给手动点。额度不累积，月底清零。
+- 一次全量抓取 = `arrivalGroups` 数量 × 日期对数量。默认 1 组 × 36 个出发日（未来 2~13 周的每个周四/五/六）= 36 次；每周一自动一轮 ≈ 150~180 次/月，剩下的留给「查指定日期」。额度不累积，月底清零。
 - 抓取前会先查账户余额，不够一整轮就直接跳过，避免半截数据覆盖 `latest.json`。
-- 一个查询最多能带 9 个机场（实测），所以分两组：A 组离周口近（北京/上海/南京/郑州/武汉/西安），B 组其他枢纽（广州/杭州/成都/长沙）。`home.onward` 里多留了几个暂时没查的机场（合肥/天津/深圳/重庆/昆明），想加回去把代码放进 `cities` 和 `arrivalGroups` 即可。
+- 一个查询最多能带 9 个机场（实测），现在正好一组：北京首都/大兴、上海浦东/虹桥、郑州、南京、武汉、广州、成都天府。`home.onward` 里多留了一些没在查的机场（西安/合肥/杭州/长沙/天津/深圳/重庆/昆明/成都双流），想加回去把代码放进 `cities` 和 `arrivalGroups` 即可；超过 9 个要拆第二组，额度翻倍。
 - 用国家 kgmid（`/m/0d05w3` 中国）当目的地也能查，但 Google 只给它挑的"热门"结果，南京、郑州这类根本不出现，所以没采用。
 - 多机场查询不返回 `price_insights`，页面自动隐藏"Google 价格水平"列和 60 天历史图。
 
@@ -32,7 +32,8 @@ pnpm generate    # 产出 .output/public
 | `cities` | 落地城市 → 机场列表，页面按城市汇总 |
 | `arrivalGroups` | 每组一次查询；拆成多组能拿到更多结果，但额度成倍 |
 | `trip.days` | 往返间隔（默认 28 天） |
-| `trip.fromDays / toDays / stepDays` | 扫描的出发日：今天起 +14 天到 +112 天，每 7 天一个 |
+| `trip.fromDays / toDays / weekdays` | 扫描的出发日：今天起 +14 天到 +91 天里的每个周四/五/六（`weekdays` 用 JS 约定，0 = 周日）；去掉 `weekdays` 则按 `stepDays` 等步长 |
+| `custom.keep` | 「查指定日期」最多保留几组 |
 | `search.bags` | 随身行李件数（影响低成本航司报价） |
 | `keepPerQuery` | 每个日期对保留的方案数（取最便宜的 N 条 + 默认权重下性价比最高的 N/2 条 + Google 推荐），原始返回约 300 条/查询，不裁剪一次抓取 6.7 MB |
 | `keepRunDays` | `data/runs/` 保留天数；`history.json` 是累积的，不受影响 |
@@ -41,11 +42,13 @@ pnpm generate    # 产出 .output/public
 
 打分参数（每小时时间价值、中转扣分、是否算高铁）在页面上实时调，存在浏览器本地。
 
-## 页面上的「抓取最新价格」按钮
+## 页面上的两个按钮
 
-静态页跑不了抓取，按钮做的是调用 GitHub API 触发 `fetch.yml`（`workflow_dispatch`），然后轮询运行状态，跑完自动重新部署。
+静态页跑不了抓取（SerpApi 也没有 CORS，浏览器不能直接调），所以按钮做的是调用 GitHub API 触发 `fetch.yml`（`workflow_dispatch`），轮询运行状态，跑完自动重新部署，约 4 分钟。
+- **抓取最新价格**：全量扫描，`arrivalGroups × 日期对` 次额度（默认 1 × 36）。
+- **查指定日期**：选出发/返回日期，只抓这一组（默认 1 次额度），结果进 `data/custom.json`，页面里标「自定义」；出发日过了自动清掉，最多留 `custom.keep` 组。
+
 第一次点会要一个 GitHub **fine-grained token**：Repository access 只勾这个仓库，Permissions 只给 Actions: Read and write。token 只存在当前浏览器的 localStorage，不进仓库。
-每次手动抓取同样消耗 `arrivalGroups × 日期对` 次额度（默认 24），确认框里会写明。
 
 ## 部署
 

@@ -66,8 +66,8 @@
     </div>
 
     <div class="mt-3 flex flex-wrap items-center gap-1.5">
-      <UBadge color="neutral" variant="subtle" size="sm" icon="i-lucide-calendar">
-        {{ fmtDate(it.query.out) }} → {{ fmtDate(it.query.ret) }}
+      <UBadge :color="it.query.custom ? 'info' : 'neutral'" variant="subtle" size="sm" :icon="it.query.custom ? 'i-lucide-calendar-search' : 'i-lucide-calendar'">
+        {{ fmtDate(it.query.out) }} → {{ fmtDate(it.query.ret) }}<template v-if="it.query.custom"> · 自定义</template>
       </UBadge>
       <UBadge v-for="t in tags" :key="t.label" :color="t.color" variant="subtle" size="sm" :icon="t.icon">
         {{ t.label }}

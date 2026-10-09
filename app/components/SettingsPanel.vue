@@ -45,6 +45,22 @@
       </div>
     </section>
 
+    <section v-if="weekdayOptions.length > 1" class="space-y-2">
+      <p class="text-xs font-medium uppercase tracking-wide text-dimmed">出发星期</p>
+      <div class="flex flex-wrap gap-2">
+        <UButton
+          v-for="d in weekdayOptions"
+          :key="d"
+          size="sm"
+          :variant="settings.weekdays.includes(d) ? 'solid' : 'outline'"
+          :color="settings.weekdays.includes(d) ? 'primary' : 'neutral'"
+          @click="toggleWeekday(d)"
+        >
+          {{ fmtWeekday(d) }}
+        </UButton>
+      </div>
+    </section>
+
     <div class="grid grid-cols-2 gap-3">
       <UFormField label="最多中转" size="sm">
         <USelect v-model="settings.maxStops" :items="STOP_ITEMS" class="w-full" />
@@ -102,6 +118,9 @@ const SORT_ITEMS = [
   { label: '到家最快', value: 'duration' },
 ]
 
+// Only weekdays that actually occur in the data (scheduled Thu/Fri/Sat plus any custom dates).
+const weekdayOptions = [...new Set(allQueries.map(q => weekdayOf(q.out)))].sort()
+
 function toggle(key: 'origins' | 'cities', v: string) {
   const list = settings.value[key]
   const i = list.indexOf(v)
@@ -110,6 +129,17 @@ function toggle(key: 'origins' | 'cities', v: string) {
     list.splice(i, 1)
   } else {
     list.push(v)
+  }
+}
+
+function toggleWeekday(d: number) {
+  const list = settings.value.weekdays
+  const i = list.indexOf(d)
+  if (i >= 0) {
+    if (list.filter(x => weekdayOptions.includes(x)).length === 1) return
+    list.splice(i, 1)
+  } else {
+    list.push(d)
   }
 }
 </script>

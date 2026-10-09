@@ -16,9 +16,15 @@
           v-model:selected="selectedOut"
           :items="matrixItems"
           :cities="settings.cities"
+          :weekdays="settings.weekdays"
           :currency="latest.currency"
           @pick="onPick"
         />
+
+        <ClientOnly>
+          <CustomQuery v-model:selected="selectedOut" />
+          <GithubTokenModal />
+        </ClientOnly>
 
         <section class="space-y-3">
           <div class="flex flex-wrap items-center justify-between gap-2">

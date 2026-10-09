@@ -6,6 +6,37 @@ export function fmtDate(iso: string, withWeekday = true) {
   return withWeekday ? `${base} 周${WEEKDAYS[d.getDay()]}` : base
 }
 
+export function fmtWeekday(dow: number) {
+  return `周${WEEKDAYS[dow]}`
+}
+
+export function weekdayOf(iso: string) {
+  return new Date(`${iso}T00:00:00`).getDay()
+}
+
+export function todayIso() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+export function addDaysIso(iso: string, days: number) {
+  const d = new Date(`${iso}T00:00:00`)
+  d.setDate(d.getDate() + days)
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+/** How many date pairs a scheduled run covers; mirrors buildDatePairs in scripts/lib/common.mjs. */
+export function scheduledPairCount() {
+  const { fromDays, toDays, weekdays, stepDays = 7 } = config.trip
+  if (!weekdays) return Math.floor((toDays - fromDays) / stepDays) + 1
+  let n = 0
+  const base = todayIso()
+  for (let o = fromDays; o <= toDays; o++) {
+    if (weekdays.includes(weekdayOf(addDaysIso(base, o)))) n++
+  }
+  return n
+}
+
 export function fmtTime(dt: string) {
   return dt.slice(11, 16)
 }

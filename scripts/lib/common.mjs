@@ -5,9 +5,15 @@ import { fileURLToPath } from 'node:url'
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..')
 export const DATA_DIR = path.join(ROOT, 'data')
 export const RUNS_DIR = path.join(DATA_DIR, 'runs')
+export const LATEST_FILE = path.join(DATA_DIR, 'latest.json')
+export const CUSTOM_FILE = path.join(DATA_DIR, 'custom.json')
 
 export async function loadConfig() {
   return JSON.parse(await readFile(path.join(ROOT, 'flyhome.config.json'), 'utf8'))
+}
+
+async function readJson(file, fallback) {
+  try { return JSON.parse(await readFile(file, 'utf8')) } catch { return fallback }
 }
 
 // Calendar date in Dubai (UTC+4), so a 03:00 UTC cron still files under the local day.
@@ -21,11 +27,17 @@ export function addDays(iso, days) {
   return d.toISOString().slice(0, 10)
 }
 
+export function weekday(iso) {
+  return new Date(`${iso}T00:00:00Z`).getUTCDay()
+}
+
+// Every departure day in the window whose weekday is listed (0 = Sunday), or every stepDays if no list.
 export function buildDatePairs(config, today) {
-  const { fromDays, toDays, stepDays, days } = config.trip
+  const { fromDays, toDays, days, weekdays, stepDays = 7 } = config.trip
   const pairs = []
-  for (let offset = fromDays; offset <= toDays; offset += stepDays) {
+  for (let offset = fromDays; offset <= toDays; offset += weekdays ? 1 : stepDays) {
     const out = addDays(today, offset)
+    if (weekdays && !weekdays.includes(weekday(out))) continue
     pairs.push({ out, ret: addDays(out, days) })
   }
   return pairs
@@ -49,23 +61,52 @@ export function trimItineraries(itineraries, keep, scoring) {
   return [...kept.values()]
 }
 
+function trimQuery(q, config) {
+  return { ...q, itineraries: trimItineraries(q.itineraries, config.keepPerQuery ?? 60, config.scoring) }
+}
+
 export async function saveRun(run) {
   const config = await loadConfig()
-  const keep = config.keepPerQuery ?? 60
-  const trimmed = { ...run, queries: run.queries.map(q => ({ ...q, itineraries: trimItineraries(q.itineraries, keep, config.scoring) })) }
+  const trimmed = { ...run, queries: run.queries.map(q => trimQuery(q, config)) }
   await mkdir(RUNS_DIR, { recursive: true })
   await writeFile(path.join(RUNS_DIR, `${run.date}.json`), JSON.stringify(trimmed))
-  await writeFile(path.join(DATA_DIR, 'latest.json'), JSON.stringify(trimmed))
+  await writeFile(LATEST_FILE, JSON.stringify(trimmed))
   await updateHistory(trimmed, config)
   await pruneRuns(config.keepRunDays ?? 90)
+  await pruneCustom(config)
+}
+
+// One-off date pairs requested from the page live in custom.json, newest first, capped and
+// dropped once the departure date has passed. A re-query of the same pair replaces the old one.
+export async function saveCustom(newQueries, quota) {
+  const config = await loadConfig()
+  const today = todayDubai()
+  let list = (await readJson(CUSTOM_FILE, [])).filter(q => q.out >= today)
+  for (const q of newQueries) {
+    list = list.filter(x => x.id !== q.id)
+    list.push({ ...trimQuery(q, config), custom: true })
+  }
+  list.sort((a, b) => (b.fetchedAt ?? '').localeCompare(a.fetchedAt ?? ''))
+  list = list.slice(0, config.custom?.keep ?? 30).sort((a, b) => a.out.localeCompare(b.out))
+  await writeFile(CUSTOM_FILE, JSON.stringify(list))
+  // The header reads the quota from latest.json; keep it honest after a custom query too.
+  const latest = await readJson(LATEST_FILE, null)
+  if (latest && quota) {
+    latest.quota = quota
+    await writeFile(LATEST_FILE, JSON.stringify(latest))
+  }
+}
+
+async function pruneCustom(config) {
+  const today = todayDubai()
+  const list = (await readJson(CUSTOM_FILE, [])).filter(q => q.out >= today).slice(0, config.custom?.keep ?? 30)
+  await writeFile(CUSTOM_FILE, JSON.stringify(list))
 }
 
 // history.json is cumulative (run, date pair, city) -> min price; a re-saved run replaces its own points.
 async function updateHistory(run, config) {
   const file = path.join(DATA_DIR, 'history.json')
-  let points = []
-  try { points = JSON.parse(await readFile(file, 'utf8')) } catch {}
-  points = points.filter(p => p.run !== run.date)
+  let points = (await readJson(file, [])).filter(p => p.run !== run.date)
   for (const q of run.queries) {
     const byCity = new Map()
     for (const it of q.itineraries) {
