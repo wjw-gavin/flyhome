@@ -85,9 +85,11 @@ export interface FlyhomeConfig {
   origins: string[]
   cities: Record<string, string[]>
   arrivalGroups: string[][]
+  github: { repo: string, workflow: string, branch: string }
   search: { currency: string, hl: string, gl: string, bags: number, showHidden: boolean }
   trip: { days: number, fromDays: number, toDays: number, stepDays: number }
-  home: { name: string, cnyPerAed: number, onward: Record<string, Onward> }
+  scoring: { hourValue: number, stopPenalty: number, overnightPenalty: number }
+  home: { name: string, onwardFallback: Onward, onward: Record<string, Onward> }
 }
 
 export interface Settings {
@@ -106,7 +108,11 @@ export interface Scored extends Itinerary {
   query: Query
   city: string
   score: number
+  onward: Onward | null
+  onwardEstimated: boolean
   onwardCost: number
   onwardHours: number
   flightCost: number
+  /** Other itineraries on the same date, airline(s), destination and price that were folded into this one. */
+  variants: number
 }

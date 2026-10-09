@@ -16,7 +16,7 @@
           <tr class="border-b border-default text-xs text-muted">
             <th class="px-4 py-2 text-left font-medium">出发 → 返回</th>
             <th v-if="hasInsights" class="px-2 py-2 text-left font-medium">Google 价格水平</th>
-            <th v-for="c in cities" :key="c" class="px-3 py-2 text-right font-medium">{{ c }}</th>
+            <th v-for="c in columns" :key="c" class="px-3 py-2 text-right font-medium">{{ c }}</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +38,7 @@
                 {{ LEVEL[row.level]?.label ?? row.level }}
               </UBadge>
             </td>
-            <td v-for="c in cities" :key="c" class="px-3 py-2 text-right">
+            <td v-for="c in columns" :key="c" class="px-3 py-2 text-right">
               <button
                 v-if="row.cells[c]"
                 class="tabular rounded-md px-2 py-0.5 font-medium transition-transform hover:scale-105"
@@ -89,6 +89,9 @@ const rows = computed(() => {
   }
   return [...byOut.values()].sort((a, b) => a.out.localeCompare(b.out))
 })
+
+// Only cities that actually have a price under the current filters, so the table stays narrow.
+const columns = computed(() => props.cities.filter(c => rows.value.some(r => r.cells[c] !== undefined)))
 
 const range = computed(() => {
   const values = rows.value.flatMap(r => Object.values(r.cells))

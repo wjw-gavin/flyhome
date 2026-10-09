@@ -21,8 +21,9 @@ export function fmtHours(hours: number) {
   return fmtDuration(Math.round(hours * 60))
 }
 
-export function fmtMoney(n: number, currency = 'AED') {
-  return `${Math.round(n).toLocaleString('en-US')} ${currency}`
+export function fmtMoney(n: number, currency = 'CNY') {
+  const v = Math.round(n).toLocaleString('en-US')
+  return currency === 'CNY' ? `¥${v}` : `${v} ${currency}`
 }
 
 export function fmtDateTime(iso: string) {

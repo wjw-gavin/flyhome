@@ -3,14 +3,29 @@
   "cities": {
     "北京": ["PEK", "PKX"],
     "上海": ["PVG", "SHA"],
+    "郑州": ["CGO"],
+    "合肥": ["HFE"],
     "南京": ["NKG"],
-    "郑州": ["CGO"]
+    "武汉": ["WUH"],
+    "西安": ["XIY"],
+    "杭州": ["HGH"],
+    "天津": ["TSN"],
+    "长沙": ["CSX"],
+    "广州": ["CAN"],
+    "深圳": ["SZX"],
+    "成都": ["TFU", "CTU"],
+    "重庆": ["CKG"],
+    "昆明": ["KMG"]
   },
-  "arrivalGroups": [["PEK", "PKX", "PVG", "SHA", "NKG", "CGO"]],
+  "arrivalGroups": [
+    ["PEK", "PKX", "PVG", "SHA", "NKG", "CGO", "HFE", "WUH", "XIY"],
+    ["CAN", "SZX", "HGH", "TFU", "CTU", "CKG", "KMG", "TSN", "CSX"]
+  ],
   "keepPerQuery": 60,
   "keepRunDays": 90,
+  "github": { "repo": "wjw-gavin/flyhome", "workflow": "fetch.yml", "branch": "main" },
   "search": {
-    "currency": "AED",
+    "currency": "CNY",
     "hl": "zh-CN",
     "gl": "ae",
     "bags": 1,
@@ -19,19 +34,36 @@
   "trip": {
     "days": 28,
     "fromDays": 14,
-    "toDays": 112,
+    "toDays": 91,
     "stepDays": 7
+  },
+  "scoring": {
+    "hourValue": 50,
+    "stopPenalty": 300,
+    "overnightPenalty": 250
   },
   "home": {
     "name": "周口",
-    "cnyPerAed": 1.98,
+    "onwardFallback": { "station": "就近高铁站", "transferHours": 1.0, "trainHours": 8.0, "trainCny": 600 },
     "onward": {
+      "CGO": { "station": "郑州东", "transferHours": 0.5, "trainHours": 1.0, "trainCny": 65 },
+      "HFE": { "station": "合肥南", "transferHours": 0.8, "trainHours": 1.6, "trainCny": 195 },
+      "NKG": { "station": "南京南", "transferHours": 0.6, "trainHours": 3.0, "trainCny": 240 },
+      "WUH": { "station": "武汉", "transferHours": 1.0, "trainHours": 3.5, "trainCny": 300 },
+      "XIY": { "station": "西安北", "transferHours": 0.8, "trainHours": 3.5, "trainCny": 330 },
       "PEK": { "station": "北京西", "transferHours": 1.2, "trainHours": 4.4, "trainCny": 400 },
       "PKX": { "station": "北京西", "transferHours": 0.9, "trainHours": 4.4, "trainCny": 400 },
       "PVG": { "station": "上海虹桥", "transferHours": 1.2, "trainHours": 4.7, "trainCny": 370 },
       "SHA": { "station": "上海虹桥", "transferHours": 0.2, "trainHours": 4.7, "trainCny": 370 },
-      "NKG": { "station": "南京南", "transferHours": 0.6, "trainHours": 3.0, "trainCny": 240 },
-      "CGO": { "station": "郑州东", "transferHours": 0.5, "trainHours": 1.0, "trainCny": 65 }
+      "HGH": { "station": "杭州东", "transferHours": 0.6, "trainHours": 4.5, "trainCny": 400 },
+      "TSN": { "station": "天津西", "transferHours": 0.8, "trainHours": 4.5, "trainCny": 380 },
+      "CSX": { "station": "长沙南", "transferHours": 0.8, "trainHours": 4.0, "trainCny": 350 },
+      "CKG": { "station": "重庆北", "transferHours": 1.0, "trainHours": 5.5, "trainCny": 500 },
+      "TFU": { "station": "成都东", "transferHours": 1.2, "trainHours": 6.0, "trainCny": 550 },
+      "CTU": { "station": "成都东", "transferHours": 0.8, "trainHours": 6.0, "trainCny": 550 },
+      "CAN": { "station": "广州南", "transferHours": 0.8, "trainHours": 6.5, "trainCny": 650 },
+      "SZX": { "station": "深圳北", "transferHours": 0.7, "trainHours": 7.0, "trainCny": 700 },
+      "KMG": { "station": "昆明南", "transferHours": 1.0, "trainHours": 10.0, "trainCny": 800 }
     }
   }
 }

@@ -25,7 +25,7 @@
             <h2 class="flex items-center gap-2 font-medium text-highlighted">
               <UIcon name="i-lucide-list-ordered" class="size-4 text-primary" />
               方案排行
-              <span class="text-sm font-normal text-muted">{{ ranked.length }} 条</span>
+              <span class="text-sm font-normal text-muted">{{ ranked.length }} 条（同价变体已折叠）</span>
             </h2>
             <UButton
               v-if="selectedOut"
@@ -55,7 +55,7 @@
         <TrendChart :selected-out="selectedOut" :cities="settings.cities" :currency="latest.currency" />
 
         <footer class="pb-4 text-center text-xs text-dimmed">
-          数据来自 Google Flights（经 SerpApi），往返总价、含 1 件随身行李；高铁时长与票价为估算，可在 flyhome.config.json 调整。
+          数据来自 Google Flights（经 SerpApi），人民币往返总价、含 1 件随身行李；高铁时长与票价为估算，可在 flyhome.config.json 调整。
         </footer>
       </main>
     </div>

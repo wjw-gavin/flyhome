@@ -40,8 +40,8 @@ export function cityOf(config, airport) {
 
 // show_hidden returns ~300 itineraries per query (6.7 MB/run); the page bundles latest.json,
 // so keep only what can plausibly rank: cheapest, best value at default weights, and Google's picks.
-export function trimItineraries(itineraries, keep) {
-  const value = it => it.price + (it.totalDuration / 60) * 25 + it.stops * 150
+export function trimItineraries(itineraries, keep, scoring) {
+  const value = it => it.price + (it.totalDuration / 60) * scoring.hourValue + it.stops * scoring.stopPenalty
   const byPrice = [...itineraries].sort((a, b) => a.price - b.price).slice(0, keep)
   const byValue = [...itineraries].sort((a, b) => value(a) - value(b)).slice(0, Math.ceil(keep / 2))
   const kept = new Map()
@@ -52,7 +52,7 @@ export function trimItineraries(itineraries, keep) {
 export async function saveRun(run) {
   const config = await loadConfig()
   const keep = config.keepPerQuery ?? 60
-  const trimmed = { ...run, queries: run.queries.map(q => ({ ...q, itineraries: trimItineraries(q.itineraries, keep) })) }
+  const trimmed = { ...run, queries: run.queries.map(q => ({ ...q, itineraries: trimItineraries(q.itineraries, keep, config.scoring) })) }
   await mkdir(RUNS_DIR, { recursive: true })
   await writeFile(path.join(RUNS_DIR, `${run.date}.json`), JSON.stringify(trimmed))
   await writeFile(path.join(DATA_DIR, 'latest.json'), JSON.stringify(trimmed))

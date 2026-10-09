@@ -72,8 +72,11 @@
       <UBadge v-for="t in tags" :key="t.label" :color="t.color" variant="subtle" size="sm" :icon="t.icon">
         {{ t.label }}
       </UBadge>
-      <UBadge v-if="onward && it.onwardHours" color="neutral" variant="outline" size="sm" icon="i-lucide-train-front">
-        {{ onward.station }} → {{ config.home.name }} {{ fmtHours(it.onwardHours) }} · ¥{{ onward.trainCny }}
+      <UTooltip v-if="it.variants" text="同一天、同航司、同落地、同价还有其他中转组合，去 Google 里看全部">
+        <UBadge color="neutral" variant="subtle" size="sm" icon="i-lucide-layers">+{{ it.variants }} 个同价变体</UBadge>
+      </UTooltip>
+      <UBadge v-if="it.onward" :color="it.onwardEstimated ? 'warning' : 'neutral'" variant="outline" size="sm" icon="i-lucide-train-front">
+        {{ it.onward.station }} → {{ config.home.name }} {{ fmtHours(it.onwardHours) }} · ¥{{ it.onward.trainCny }}{{ it.onwardEstimated ? '（粗估）' : '' }}
       </UBadge>
 
       <div class="ml-auto flex items-center gap-1">
@@ -128,7 +131,6 @@ const first = computed(() => props.it.segments[0]!)
 const last = computed(() => props.it.segments[props.it.segments.length - 1]!)
 const days = computed(() => dayOffset(first.value.dep, last.value.arr))
 const logos = computed(() => [...new Set(props.it.segments.map(s => s.airlineLogo).filter(Boolean))] as string[])
-const onward = computed(() => config.home.onward[props.it.dest])
 
 const LOW_COST = ['阿拉伯航空', 'Air Arabia', '迪拜航空', 'flydubai', 'Wizz', '亚洲航空', 'AirAsia', '酷航', 'Scoot', '靛蓝', 'IndiGo', '捷星', 'Jetstar']
 
@@ -148,7 +150,7 @@ const tags = computed(() => {
 const breakdown = computed(() => {
   const it = props.it
   const parts = [`票价 ${Math.round(it.price)}`, `飞行时间与中转折算 +${Math.round(it.flightCost - it.price)}`]
-  if (it.onwardHours) parts.push(`高铁段折算 +${Math.round(it.score - it.flightCost)}`)
+  if (it.onward) parts.push(`高铁段票价与时间折算 +${Math.round(it.score - it.flightCost)}`)
   return parts.join(' · ')
 })
 </script>

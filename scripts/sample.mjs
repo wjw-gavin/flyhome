@@ -61,7 +61,8 @@ function build(route, out, seasonal) {
     }
   })
   const total = segments.reduce((s, x) => s + x.duration, 0) + layovers.reduce((s, l) => s + l.duration, 0)
-  const price = Math.round((route.base * seasonal * (0.9 + rand() * 0.3)) / 5) * 5
+  // Route bases were sketched in AED; ×2 lands in a plausible CNY range.
+  const price = Math.round((route.base * 2 * seasonal * (0.9 + rand() * 0.3)) / 5) * 5
   return {
     id: `${out}_${segments.map(s => s.flightNumber.replace(/\s+/g, '')).join('-')}`,
     origin: route.origin, originName: airports[route.origin], dest: route.dest, destName: airports[route.dest],

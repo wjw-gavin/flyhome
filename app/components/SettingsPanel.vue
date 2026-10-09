@@ -60,26 +60,26 @@
       <div>
         <div class="mb-2 flex items-center justify-between text-sm">
           <span class="text-default">我的一小时值多少钱</span>
-          <span class="tabular font-medium text-highlighted">{{ settings.hourValue }} AED</span>
+          <span class="tabular font-medium text-highlighted">¥{{ settings.hourValue }}</span>
         </div>
-        <USlider v-model="settings.hourValue" :min="0" :max="100" :step="5" />
-        <p class="mt-1 text-xs text-dimmed">每多飞 1 小时，综合成本加这么多；设为 0 就是纯比价格。</p>
+        <USlider v-model="settings.hourValue" :min="0" :max="300" :step="10" />
+        <p class="mt-1 text-xs text-dimmed">每多花 1 小时（飞行、中转、高铁），综合成本加这么多；设为 0 就是纯比价格。</p>
       </div>
       <div>
         <div class="mb-2 flex items-center justify-between text-sm">
           <span class="text-default">每次中转额外扣</span>
-          <span class="tabular font-medium text-highlighted">{{ settings.stopPenalty }} AED</span>
+          <span class="tabular font-medium text-highlighted">¥{{ settings.stopPenalty }}</span>
         </div>
-        <USlider v-model="settings.stopPenalty" :min="0" :max="500" :step="25" />
+        <USlider v-model="settings.stopPenalty" :min="0" :max="1000" :step="50" />
       </div>
       <div>
         <div class="mb-2 flex items-center justify-between text-sm">
           <span class="text-default">隔夜中转再扣</span>
-          <span class="tabular font-medium text-highlighted">{{ settings.overnightPenalty }} AED</span>
+          <span class="tabular font-medium text-highlighted">¥{{ settings.overnightPenalty }}</span>
         </div>
-        <USlider v-model="settings.overnightPenalty" :min="0" :max="500" :step="20" />
+        <USlider v-model="settings.overnightPenalty" :min="0" :max="1000" :step="50" />
       </div>
-      <USwitch v-model="settings.includeOnward" :label="`算上高铁回${config.home.name}`" description="把机场到高铁站、高铁的时间和票价一起算进综合成本" />
+      <USwitch v-model="settings.includeOnward" :label="`算上高铁回${config.home.name}`" description="把机场到高铁站、高铁的时间和票价一起算进综合成本；没单独配置的城市按 8 小时 ¥600 估" />
     </section>
   </UCard>
 </template>

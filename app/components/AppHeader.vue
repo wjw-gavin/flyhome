@@ -11,7 +11,7 @@
             <span class="ml-2 text-base font-normal text-muted">回家机票比价</span>
           </h1>
           <p class="text-sm text-muted">
-            {{ originLabel }} ⇄ {{ cityNames.join(' / ') }} · 往返 {{ config.trip.days }} 天 · 最终回{{ config.home.name }}
+            {{ originLabel }} ⇄ {{ cityNames.slice(0, 4).join(' / ') }} 等 {{ cityNames.length }} 城 · 往返 {{ config.trip.days }} 天 · 最终回{{ config.home.name }} · 人民币
           </p>
         </div>
       </div>
@@ -22,9 +22,14 @@
             更新于 {{ fmtDateTime(run.fetchedAt) }}
           </UBadge>
         </UTooltip>
-        <UBadge v-if="run.quota" color="neutral" variant="subtle" icon="i-lucide-gauge" size="lg">
-          本月剩余 {{ run.quota.left }}{{ run.quota.total ? ` / ${run.quota.total}` : '' }} 次
-        </UBadge>
+        <UTooltip text="SerpApi 免费额度，每次抓取按日期组数扣减，上次抓取后的余量">
+          <UBadge v-if="run.quota" color="neutral" variant="subtle" icon="i-lucide-gauge" size="lg">
+            本月剩余 {{ run.quota.left }}{{ run.quota.total ? ` / ${run.quota.total}` : '' }} 次
+          </UBadge>
+        </UTooltip>
+        <ClientOnly>
+          <FetchButton :run="run" />
+        </ClientOnly>
         <UColorModeButton />
       </div>
     </div>

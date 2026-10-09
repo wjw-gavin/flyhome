@@ -3,7 +3,7 @@ import historyJson from '~~/data/history.json'
 import configJson from '~~/flyhome.config.json'
 import type { FlyhomeConfig, HistoryPoint, Itinerary, Query, RunFile, Scored, Settings } from '~/types/flyhome'
 
-const STORAGE_KEY = 'flyhome.settings.v1'
+const STORAGE_KEY = 'flyhome.settings.v2'
 
 export const config = configJson as FlyhomeConfig
 export const latest = latestJson as unknown as RunFile
@@ -18,9 +18,7 @@ export function cityOf(airport: string) {
 
 function defaultSettings(): Settings {
   return {
-    hourValue: 25,
-    stopPenalty: 150,
-    overnightPenalty: 120,
+    ...config.scoring,
     includeOnward: true,
     maxStops: 2,
     origins: [...config.origins],
@@ -45,16 +43,32 @@ export function useSettings() {
 }
 
 export function scoreItinerary(it: Itinerary, q: Query, s: Settings): Scored {
-  const onward = config.home.onward[it.dest]
-  const onwardHours = s.includeOnward && onward ? onward.transferHours + onward.trainHours : 0
-  const onwardCost = s.includeOnward && onward ? onward.trainCny / config.home.cnyPerAed : 0
+  const known = config.home.onward[it.dest]
+  const onward = s.includeOnward ? known ?? config.home.onwardFallback : null
+  const onwardHours = onward ? onward.transferHours + onward.trainHours : 0
+  // Train fare is in CNY, same as the flight prices (search.currency must stay CNY).
+  const onwardCost = onward ? onward.trainCny : 0
   const overnightLayovers = it.layovers.filter(l => l.overnight).length
   const flightCost = it.price
     + (it.totalDuration / 60) * s.hourValue
     + it.stops * s.stopPenalty
     + overnightLayovers * s.overnightPenalty
   const score = flightCost + onwardCost + onwardHours * s.hourValue
-  return { ...it, query: q, city: cityOf(it.dest), score, onwardCost, onwardHours, flightCost }
+  return { ...it, query: q, city: cityOf(it.dest), score, onward, onwardEstimated: !known, onwardCost, onwardHours, flightCost, variants: 0 }
+}
+
+// Airlines often price several routings identically (e.g. 国航 via CKG with different layovers);
+// keep the best-scoring one per (date pair, airlines, destination, price) and count the rest.
+function collapseVariants(list: Scored[]) {
+  const groups = new Map<string, Scored>()
+  for (const it of list) {
+    const key = `${it.query.id}|${it.airlines.join('+')}|${it.dest}|${it.price}`
+    const head = groups.get(key)
+    if (!head) groups.set(key, { ...it, variants: 0 })
+    else if (it.score < head.score) groups.set(key, { ...it, variants: head.variants + 1 })
+    else head.variants++
+  }
+  return [...groups.values()]
 }
 
 export function useRanked(settings: Ref<Settings>, selectedOut: Ref<string | null>) {
@@ -74,7 +88,7 @@ export function useRanked(settings: Ref<Settings>, selectedOut: Ref<string | nul
 
   const ranked = computed(() => {
     const s = settings.value
-    const list = [...filtered.value]
+    const list = collapseVariants(filtered.value)
     if (s.sort === 'price') list.sort((a, b) => a.price - b.price)
     else if (s.sort === 'duration') list.sort((a, b) => a.totalDuration + a.onwardHours * 60 - (b.totalDuration + b.onwardHours * 60))
     else list.sort((a, b) => a.score - b.score)

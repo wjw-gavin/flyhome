@@ -2,8 +2,8 @@ name: Fetch prices
 
 on:
   schedule:
-    # Every other day at 07:00 Dubai time; ~15 searches per run keeps the free SerpApi tier (250/month) safe.
-    - cron: '0 3 */2 * *'
+    # Mon + Thu 07:00 Dubai time; 2 groups × 12 date pairs = 24 searches per run ≈ 210/month (free tier 250).
+    - cron: '0 3 * * 1,4'
   workflow_dispatch:
 
 permissions:
