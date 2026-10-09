@@ -1,9 +1,8 @@
 name: Fetch prices
 
 on:
-  schedule:
-    # Mon + Thu 07:00 Dubai time; 2 groups × 12 date pairs = 24 searches per run ≈ 210/month (free tier 250).
-    - cron: '0 3 * * 1,4'
+  # Manual only (page button or Actions → Run workflow): 2 groups × 12 date pairs = 24 searches per run.
+  # To re-enable a schedule add e.g.  schedule: [{ cron: '0 3 * * 1' }]  (Mon 07:00 Dubai ≈ 100 searches/month).
   workflow_dispatch:
 
 permissions:
