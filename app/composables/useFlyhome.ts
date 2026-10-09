@@ -12,8 +12,13 @@ export const customQueries = customJson as unknown as Query[]
 // Named to avoid shadowing window.history inside components.
 export const priceHistory = historyJson as HistoryPoint[]
 
-/** Scheduled scan plus one-off custom date pairs, in departure order. */
-export const allQueries: Query[] = [...latest.queries, ...customQueries].sort((a, b) => a.out.localeCompare(b.out))
+/**
+ * Scheduled scan plus one-off custom date pairs, in departure order.
+ * Scan rows earlier than the configured window (e.g. after fromDays was raised) are hidden until the next run replaces them.
+ */
+const windowStart = addDaysIso(latest.date, config.trip.fromDays)
+export const allQueries: Query[] = [...latest.queries.filter(q => q.out >= windowStart), ...customQueries]
+  .sort((a, b) => a.out.localeCompare(b.out))
 
 export const cityNames = Object.keys(config.cities)
 

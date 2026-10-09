@@ -25,8 +25,8 @@
   },
   "trip": {
     "days": 28,
-    "fromDays": 14,
-    "toDays": 91,
+    "fromDays": 30,
+    "toDays": 75,
     "weekdays": [4, 5, 6]
   },
   "scoring": {

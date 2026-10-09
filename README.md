@@ -18,7 +18,7 @@ pnpm generate    # 产出 .output/public
 ## 数据来源与额度
 
 - Google Flights 没有官方 API，通过 [SerpApi](https://serpapi.com/google-flights-api) 查询。免费档每月 250 次搜索。
-- 一次全量抓取 = `arrivalGroups` 数量 × 日期对数量。默认 1 组 × 36 个出发日（未来 2~13 周的每个周四/五/六）= 36 次；每周一自动一轮 ≈ 150~180 次/月，剩下的留给「查指定日期」。额度不累积，月底清零。
+- 一次全量抓取 = `arrivalGroups` 数量 × 日期对数量。默认 1 组 × 约 20 个出发日（未来 1 个月到 2 个半月的每个周四/五/六）≈ 20 次；每周一自动一轮 ≈ 80~100 次/月，剩下的留给「查指定日期」。额度不累积，月底清零。
 - 抓取前会先查账户余额，不够一整轮就直接跳过，避免半截数据覆盖 `latest.json`。
 - 一个查询最多能带 9 个机场（实测），现在正好一组：北京首都/大兴、上海浦东/虹桥、郑州、南京、武汉、广州、成都天府。`home.onward` 里多留了一些没在查的机场（西安/合肥/杭州/长沙/天津/深圳/重庆/昆明/成都双流），想加回去把代码放进 `cities` 和 `arrivalGroups` 即可；超过 9 个要拆第二组，额度翻倍。
 - 用国家 kgmid（`/m/0d05w3` 中国）当目的地也能查，但 Google 只给它挑的"热门"结果，南京、郑州这类根本不出现，所以没采用。
@@ -32,7 +32,7 @@ pnpm generate    # 产出 .output/public
 | `cities` | 落地城市 → 机场列表，页面按城市汇总 |
 | `arrivalGroups` | 每组一次查询；拆成多组能拿到更多结果，但额度成倍 |
 | `trip.days` | 往返间隔（默认 28 天） |
-| `trip.fromDays / toDays / weekdays` | 扫描的出发日：今天起 +14 天到 +91 天里的每个周四/五/六（`weekdays` 用 JS 约定，0 = 周日）；去掉 `weekdays` 则按 `stepDays` 等步长 |
+| `trip.fromDays / toDays / weekdays` | 扫描的出发日：今天起 +30 天到 +75 天里的每个周四/五/六（`weekdays` 用 JS 约定，0 = 周日）；去掉 `weekdays` 则按 `stepDays` 等步长。页面会隐藏早于 fromDays 的旧扫描行 |
 | `custom.keep` | 「查指定日期」最多保留几组 |
 | `search.bags` | 随身行李件数（影响低成本航司报价） |
 | `keepPerQuery` | 每个日期对保留的方案数（取最便宜的 N 条 + 默认权重下性价比最高的 N/2 条 + Google 推荐），原始返回约 300 条/查询，不裁剪一次抓取 6.7 MB |
